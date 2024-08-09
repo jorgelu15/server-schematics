@@ -3,22 +3,49 @@ import Taskbar from "./components/Header/Taskbar";
 import TaskUtilities from "./components/Header/TaskUtilities";
 import { IComponente } from "./interfaces/IComponente";
 import useGrid from "./hooks/useGrid";
+import Grid from "./components/Sketch/Grid";
 
 function App() {
   const [components, setcomponents] = useState<IComponente[]>([]);
   const gridRef = useRef<HTMLDivElement | null>(null);
   const componentesRefs = useRef<(HTMLDivElement | null)[]>([]);
-
   const { nCuadradosH, nCuadradosV, sizeSquare } = useGrid(gridRef);
-
+  const [dimensionsTaskbars, setDimensionsTaskbar] = useState({
+    taskbar: 0,
+    headerUtilities: 0
+  })
   const onAddComponente = (componente: IComponente) => {
     setcomponents([...components, componente]);
   };
 
   const onMoveAt = (pageX: number, pageY: number, idx: number) => {
     const elements: IComponente[] = [...components];
-    elements[idx] = { ...elements[idx], x: pageX, y: pageY };
-    console.log(elements)
+
+    //se obtienen las posiciones (x,y) actuales
+    const xPos = (pageX);
+    const yPos = (pageY);
+
+    let newX, newY;
+
+    //se valida la posicion minima o maxima en (x,y) para que el componente encaje en un cuadro de lˆ2 y se almacena la posicion
+    //nueva en las variables
+    const roundXPos = Math.round(xPos);
+    const roundYPos = Math.round(yPos);
+    const roundedSizeSquare = Math.round(sizeSquare);
+
+    const xRemainder = roundXPos % roundedSizeSquare;
+    const yRemainder = roundYPos % roundedSizeSquare;
+
+    newX = xRemainder < Math.round(roundedSizeSquare / 2)
+        ? roundXPos - xRemainder
+        : roundXPos + roundedSizeSquare - xRemainder;
+
+    newY = yRemainder < Math.round(roundedSizeSquare / 2)
+        ? roundYPos - yRemainder
+        : roundYPos + roundedSizeSquare - yRemainder;
+
+    elements[idx] = { ...elements[idx], x: newX, y: newY };
+    
     setcomponents(elements);
   };
 
@@ -31,7 +58,9 @@ function App() {
       let shiftY = e.clientY - element.getBoundingClientRect().top;
 
       const handleMouseMove = (moveEvent: MouseEvent) => {
-        onMoveAt(moveEvent.pageX - shiftX, moveEvent.pageY - shiftY, idx);
+        let y_ = { alto: window.innerHeight - (gridRef?.current?.offsetHeight || 0) + dimensionsTaskbars.taskbar + shiftY }
+        let x_ = { ancho: window.innerWidth - (gridRef.current?.offsetWidth || 0) + shiftX }
+        onMoveAt(moveEvent.pageX - x_.ancho, moveEvent.pageY - y_.alto, idx);
       };
 
       const handleMouseUp = () => {
@@ -46,39 +75,12 @@ function App() {
 
   return (
     <div className="w-full h-screen bg-slate-900 text-white flex flex-col">
-      <Taskbar />
-      <div className="w-full h-full fixed flex top-10">
-        <TaskUtilities onAddComponente={onAddComponente} />
-        <div className="w-5/6 bg-slate-500 right-0 overflow-hidden" ref={gridRef}>
-          <div className="relative w-full h-full">
-            {Array.from({ length: nCuadradosH + 1 }).map((_, idx) => (
-              <div
-                key={idx}
-                style={{
-                  position: "absolute",
-                  top: `${idx * sizeSquare}px`,
-                  left: 0,
-                  width: "100%",
-                  height: "1px",
-                  backgroundColor: "#CFEBFA",
-                }}
-                className="z-0"
-              ></div>
-            ))}
-            {Array.from({ length: nCuadradosV + 1 }).map((_, idx) => (
-              <div
-                key={idx}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: `${idx * sizeSquare}px`,
-                  width: "1px",
-                  height: "100%",
-                  backgroundColor: "#CFEBFA",
-                }}
-                className="z-0"
-              ></div>
-            ))}
+      <Taskbar setDimensionsTaskbar={setDimensionsTaskbar} />
+      <div className="w-full h-full relative flex">
+        <TaskUtilities setDimensionsTaskbar={setDimensionsTaskbar} onAddComponente={onAddComponente} />
+        <div className="w-5/6 bg-slate-500 right-0 overflow-hidden relative" ref={gridRef}>
+          <div className="w-full h-full absolute">
+            <Grid nCuadradosH={nCuadradosH} nCuadradosV={nCuadradosV} sizeSquare={sizeSquare} />
             {components?.map((componente: IComponente, idx: number) => (
               <div
                 key={idx}
@@ -87,6 +89,7 @@ function App() {
                   w-[60px] 
                   h-[60px] 
                   z-10 
+                  cursor-pointer
                   `}
                 style={{ top: `${componente.y}px`, left: `${componente.x}px` }}
                 onMouseDown={(e) => onMoveDownComponent(e, idx)}
