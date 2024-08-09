@@ -4,51 +4,26 @@ import TaskUtilities from "./components/Header/TaskUtilities";
 import { IComponente } from "./interfaces/IComponente";
 import useGrid from "./hooks/useGrid";
 import Grid from "./components/Sketch/Grid";
+import useMoveComponent from "./hooks/useMoveComponent";
+import html2canvas from "html2canvas";
+import ComponentElement from "./components/Sketch/Component";
 
 function App() {
   const [components, setcomponents] = useState<IComponente[]>([]);
-  const gridRef = useRef<HTMLDivElement | null>(null);
-  const componentesRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const { nCuadradosH, nCuadradosV, sizeSquare } = useGrid(gridRef);
   const [dimensionsTaskbars, setDimensionsTaskbar] = useState({
     taskbar: 0,
     headerUtilities: 0
-  })
+  });
+
+  const gridRef = useRef<HTMLDivElement | null>(null);
+  const componentesRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const { nCuadradosH, nCuadradosV, sizeSquare } = useGrid(gridRef);
+  const { onMoveAt } = useMoveComponent();
+
   const onAddComponente = (componente: IComponente) => {
     setcomponents([...components, componente]);
   };
-
-  const onMoveAt = (pageX: number, pageY: number, idx: number) => {
-    const elements: IComponente[] = [...components];
-
-    //se obtienen las posiciones (x,y) actuales
-    const xPos = (pageX);
-    const yPos = (pageY);
-
-    let newX, newY;
-
-    //se valida la posicion minima o maxima en (x,y) para que el componente encaje en un cuadro de lˆ2 y se almacena la posicion
-    //nueva en las variables
-    const roundXPos = Math.round(xPos);
-    const roundYPos = Math.round(yPos);
-    const roundedSizeSquare = Math.round(sizeSquare);
-
-    const xRemainder = roundXPos % roundedSizeSquare;
-    const yRemainder = roundYPos % roundedSizeSquare;
-
-    newX = xRemainder < Math.round(roundedSizeSquare / 2)
-        ? roundXPos - xRemainder
-        : roundXPos + roundedSizeSquare - xRemainder;
-
-    newY = yRemainder < Math.round(roundedSizeSquare / 2)
-        ? roundYPos - yRemainder
-        : roundYPos + roundedSizeSquare - yRemainder;
-
-    elements[idx] = { ...elements[idx], x: newX, y: newY };
-    
-    setcomponents(elements);
-  };
-
 
   const onMoveDownComponent = (e: React.MouseEvent, idx: number) => {
     e.preventDefault();
@@ -60,7 +35,7 @@ function App() {
       const handleMouseMove = (moveEvent: MouseEvent) => {
         let y_ = { alto: window.innerHeight - (gridRef?.current?.offsetHeight || 0) + dimensionsTaskbars.taskbar + shiftY }
         let x_ = { ancho: window.innerWidth - (gridRef.current?.offsetWidth || 0) + shiftX }
-        onMoveAt(moveEvent.pageX - x_.ancho, moveEvent.pageY - y_.alto, idx);
+        onMoveAt(moveEvent.pageX - x_.ancho, moveEvent.pageY - y_.alto, idx, components, sizeSquare, setcomponents);
       };
 
       const handleMouseUp = () => {
@@ -73,30 +48,49 @@ function App() {
     }
   };
 
+  const onCaptureScreenshot = async () => {
+    if (gridRef.current) {
+      try {
+        // Asegúrate de que todos los elementos están completamente renderizados
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        await new Promise(resolve => setTimeout(resolve, 100)); // Esperar un poco más
+  
+        const canvas = await html2canvas(gridRef.current, {
+          useCORS: true, // Para imágenes externas
+          scrollX: 0,
+          scrollY: -window.scrollY, // Para evitar problemas con el desplazamiento
+          backgroundColor: null // Para capturar el fondo transparente
+        });
+        const dataURL = canvas.toDataURL('image/png');
+  
+        // Crear un enlace para descargar la imagen
+        const link = document.createElement('a');
+        link.href = dataURL;
+        link.download = 'esquematico.png';
+        link.click();
+      } catch (error) {
+        console.error('Error capturing screenshot:', error);
+      }
+    }
+  };
+
   return (
     <div className="w-full h-screen bg-slate-900 text-white flex flex-col">
-      <Taskbar setDimensionsTaskbar={setDimensionsTaskbar} />
+      <Taskbar setDimensionsTaskbar={setDimensionsTaskbar} onCaptureScreenshot={onCaptureScreenshot} />
       <div className="w-full h-full relative flex">
         <TaskUtilities setDimensionsTaskbar={setDimensionsTaskbar} onAddComponente={onAddComponente} />
         <div className="w-5/6 bg-slate-500 right-0 overflow-hidden relative" ref={gridRef}>
-          <div className="w-full h-full absolute">
+          <div className="w-full h-full absolute" >
             <Grid nCuadradosH={nCuadradosH} nCuadradosV={nCuadradosV} sizeSquare={sizeSquare} />
             {components?.map((componente: IComponente, idx: number) => (
-              <div
+              <ComponentElement
                 key={idx}
-                className={`
-                  absolute 
-                  w-[60px] 
-                  h-[60px] 
-                  z-10 
-                  cursor-pointer
-                  `}
-                style={{ top: `${componente.y}px`, left: `${componente.x}px` }}
-                onMouseDown={(e) => onMoveDownComponent(e, idx)}
-                ref={(ref) => (componentesRefs.current[idx] = ref)}
-              >
-                <img src={componente.url_componente} alt={componente.nombre} />
-              </div>
+                idx={idx} // Cambia esto si el componente espera `indice` en lugar de `idx`
+                componente={componente}
+                componentesRefs={componentesRefs}
+                onMoveDownComponent={onMoveDownComponent}
+              />
+
             ))}
           </div>
         </div>

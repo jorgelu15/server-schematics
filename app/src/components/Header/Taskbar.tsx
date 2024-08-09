@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-const Taskbar = ({ setDimensionsTaskbar }: any) => {
+const Taskbar = ({ setDimensionsTaskbar, onCaptureScreenshot }: any) => {
     const [openArchivos, setOpenArchivos] = useState(false);
     const taskbarRef = useRef<HTMLDivElement | null>(null);
 
@@ -32,7 +32,7 @@ const Taskbar = ({ setDimensionsTaskbar }: any) => {
                                 <a>Guardar archivo</a>
 
                             </li>
-                            <li className="hover:bg-slate-500 p-2">
+                            <li onClick={onCaptureScreenshot} className="hover:bg-slate-500 p-2">
                                 <a>Exportar como...</a>
                             </li>
                         </ul>
