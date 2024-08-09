@@ -1,7 +1,7 @@
 import { IComponente } from "../interfaces/IComponente";
 
 const useMoveComponent = () => {
-    const onMoveAt = (pageX: number, pageY: number, idx: number, components: IComponente[], sizeSquare: number, setcomponents: any) => {
+    const onMoveAt = (pageX: number, pageY: number, idx: number, components: IComponente[], sizeSquare: number, setcomponents: any, dimensionsTaskbars: any) => {
         const elements: IComponente[] = [...components];
 
         //se obtienen las posiciones (x,y) actuales
@@ -27,8 +27,23 @@ const useMoveComponent = () => {
             ? roundYPos - yRemainder
             : roundYPos + roundedSizeSquare - yRemainder;
 
-        elements[idx] = { ...elements[idx], x: newX, y: newY };
+        if (newX < 0) {
+            newX = 0;
+        }
 
+        if (newY < 0) {
+            newY = 0
+        }
+
+        if (newX > window.innerWidth - dimensionsTaskbars.headerUtilities- sizeSquare) {
+            newX = window.innerWidth - dimensionsTaskbars.headerUtilities- sizeSquare;
+        }
+
+        if (newY > window.innerHeight - dimensionsTaskbars.taskbar - sizeSquare) {
+            newY = window.innerHeight - dimensionsTaskbars.taskbar - sizeSquare;
+        }
+
+        elements[idx] = { ...elements[idx], x: newX, y: newY };
         setcomponents(elements);
     };
     return {

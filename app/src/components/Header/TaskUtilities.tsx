@@ -28,6 +28,7 @@ const TaskUtilities = ({ onAddComponente, setDimensionsTaskbar }: any) => {
                     className="w-full p-2 rounded text-black"
                 />
             </div>
+            <p className="p-2">Da clic en uno de los elementos para que aparezca en el lienzo</p>
             <div className="flex flex-row flex-wrap justify-around">
                 {
                     filteredComponents?.map((element: IComponente, idx: number) => (

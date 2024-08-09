@@ -35,7 +35,7 @@ function App() {
       const handleMouseMove = (moveEvent: MouseEvent) => {
         let y_ = { alto: window.innerHeight - (gridRef?.current?.offsetHeight || 0) + dimensionsTaskbars.taskbar + shiftY }
         let x_ = { ancho: window.innerWidth - (gridRef.current?.offsetWidth || 0) + shiftX }
-        onMoveAt(moveEvent.pageX - x_.ancho, moveEvent.pageY - y_.alto, idx, components, sizeSquare, setcomponents);
+        onMoveAt(moveEvent.pageX - x_.ancho, moveEvent.pageY - y_.alto, idx, components, sizeSquare, setcomponents, dimensionsTaskbars);
       };
 
       const handleMouseUp = () => {
