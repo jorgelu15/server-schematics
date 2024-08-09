@@ -27,21 +27,10 @@ const useMoveComponent = () => {
             ? roundYPos - yRemainder
             : roundYPos + roundedSizeSquare - yRemainder;
 
-        if (newX < 0) {
-            newX = 0;
-        }
+        // Limitar el movimiento dentro de los límites especificados usando Math.max y Math.min
+        newX = Math.max(0, Math.min(newX, window.innerWidth - dimensionsTaskbars.headerUtilities - sizeSquare));
+        newY = Math.max(0, Math.min(newY, window.innerHeight - dimensionsTaskbars.taskbar - sizeSquare));
 
-        if (newY < 0) {
-            newY = 0
-        }
-
-        if (newX > window.innerWidth - dimensionsTaskbars.headerUtilities- sizeSquare) {
-            newX = window.innerWidth - dimensionsTaskbars.headerUtilities- sizeSquare;
-        }
-
-        if (newY > window.innerHeight - dimensionsTaskbars.taskbar - sizeSquare) {
-            newY = window.innerHeight - dimensionsTaskbars.taskbar - sizeSquare;
-        }
 
         elements[idx] = { ...elements[idx], x: newX, y: newY };
         setcomponents(elements);
