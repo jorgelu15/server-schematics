@@ -15,6 +15,12 @@ function App() {
     headerUtilities: 0
   });
 
+  const [openMainTaskbar, setOpenMainTaskbar] = useState({
+    files: false,
+    edition: false,
+    uuid_component: null
+});
+
   const gridRef = useRef<HTMLDivElement | null>(null);
   const componentesRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -76,7 +82,7 @@ function App() {
 
   return (
     <div className="w-full h-screen bg-slate-900 text-white flex flex-col">
-      <Taskbar setDimensionsTaskbar={setDimensionsTaskbar} onCaptureScreenshot={onCaptureScreenshot} />
+      <Taskbar setDimensionsTaskbar={setDimensionsTaskbar} onCaptureScreenshot={onCaptureScreenshot} setOpenMainTaskbar={setOpenMainTaskbar} openMainTaskbar={openMainTaskbar} setcomponents={setcomponents}/>
       <div className="w-full h-full relative flex">
         <TaskUtilities setDimensionsTaskbar={setDimensionsTaskbar} onAddComponente={onAddComponente} />
         <div className="w-5/6 bg-slate-500 right-0 overflow-hidden relative" ref={gridRef}>
@@ -89,6 +95,7 @@ function App() {
                 componente={componente}
                 componentesRefs={componentesRefs}
                 onMoveDownComponent={onMoveDownComponent}
+                setOpenMainTaskbar={setOpenMainTaskbar}
               />
 
             ))}

@@ -4,5 +4,6 @@ export interface IComponente {
     url_componente: string,
     type: string,
     x: number,
-    y: number
+    y: number,
+    rotate: number
 }
