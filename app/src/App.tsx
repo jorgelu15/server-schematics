@@ -96,6 +96,7 @@ function App() {
                 componentesRefs={componentesRefs}
                 onMoveDownComponent={onMoveDownComponent}
                 setOpenMainTaskbar={setOpenMainTaskbar}
+                openMainTaskbar={openMainTaskbar}
               />
 
             ))}

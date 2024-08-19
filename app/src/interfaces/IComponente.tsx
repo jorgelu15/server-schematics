@@ -1,3 +1,5 @@
+import { IAncla } from "./IAncla";
+
 export interface IComponente {
     uuid_componente: string,
     nombre: string,
@@ -5,5 +7,6 @@ export interface IComponente {
     type: string,
     x: number,
     y: number,
-    rotate: number
+    rotate: number,
+    anclas: IAncla[]
 }
